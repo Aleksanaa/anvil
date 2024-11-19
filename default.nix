@@ -4,8 +4,6 @@
   buildGoModule,
   pkg-config,
   libicns,
-  copyDesktopItems,
-  makeDesktopItem,
   desktopToDarwinBundle,
   apple-sdk_11,
   wayland,
@@ -15,7 +13,7 @@
   xorg,
 }:
 
-buildGoModule rec {
+buildGoModule {
   pname = "anvil";
   version = "git";
 
@@ -27,7 +25,6 @@ buildGoModule rec {
     [
       pkg-config
       libicns # icns2png
-      copyDesktopItems
     ]
     ++ lib.optionals stdenv.hostPlatform.isDarwin [
       desktopToDarwinBundle
@@ -50,19 +47,8 @@ buildGoModule rec {
   # Got different result in utf8 char length?
   checkFlags = [ "-skip=^TestClearAfter$" ];
 
-  desktopItems = [
-    (makeDesktopItem {
-      name = "anvil";
-      exec = "anvil";
-      icon = "anvil";
-      desktopName = "Anvil";
-      comment = meta.description;
-      categories = [ "TextEditor" ];
-      startupWMClass = "anvil";
-    })
-  ];
-
   postInstall = ''
+    install -Dm644 misc/desktop/anvil.desktop -t $out/share/applications
     pushd misc/icon
       for width in 32 48 128 256; do
         install -Dm644 anvil''${width}b.png \
